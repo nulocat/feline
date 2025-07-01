@@ -1,3 +1,7 @@
+# Old Base Files
+.old_feline_base
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
