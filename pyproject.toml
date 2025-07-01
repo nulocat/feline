@@ -34,7 +34,7 @@ dependencies = [
   "aiohttp",
   "rich",
   "rich_click",
-
+]
 [project.urls]
 Documentation = "https://github.com/NuloCat/feline#readme"
 Issues = "https://github.com/NuloCat/feline/issues"
