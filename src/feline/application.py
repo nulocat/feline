@@ -15,6 +15,7 @@ import inspect
 
 rich_trace_install()
 
+
 # === App Class ===
 class Feline:
     def __init__(
@@ -33,7 +34,7 @@ class Feline:
 
     async def handle_request(self) -> Response:
         """Resolve a rota e chama o handler correspondente."""
-        request: Request =  context.request
+        request: Request = context.request
 
         method: str = request.method.upper()
         path: str = request.path.lower()
@@ -48,7 +49,7 @@ class Feline:
         else:
             response = handler(**arguments)
 
-        if response is None:    
+        if response is None:
             raise RouteHasNoResponse(path, method, response)
 
         elif isinstance(response, str) and "<html>" in response:
@@ -59,7 +60,6 @@ class Feline:
 
         elif not isinstance(response, Response):
             response: Response = Response().text(str(response))
-
 
         return response
 
@@ -75,7 +75,7 @@ class Feline:
                     self.shutdown_callback()
                 await send({"type": "lifespan.shutdown.complete"})
                 return
-            
+
     # the uvicorn call
     async def __call__(self, scope, receive, send):
         try:
@@ -97,7 +97,7 @@ class Feline:
                             "body": bytes(response),
                             "more_body": False,
                         }
-                )
+                    )
             elif scope["type"] == "lifespan":
                 await self.handle_lifespan(scope=scope, receive=receive, send=send)
             else:
@@ -109,8 +109,7 @@ class Feline:
             for exception_type, handle_function in self.exception_handles:
                 if isinstance(e, exception_type):
                     return handle_function()
-            raise e # TEMP, future handle erro
-            
+            raise e  # TEMP, future handle erro
 
     def run(self, import_path: str, host="127.0.0.1", port=5000, debug=False) -> None:
 
@@ -123,6 +122,11 @@ class Feline:
         try:
             mod = importlib.import_module(module_name)
             app = getattr(mod, app_name)
+
+            if not debug:
+                uvicorn.run(app, host=host, port=port, reload=debug)
+            else:
+                uvicorn.run(import_path, host=host, port=port, reload=True)
         except ModuleNotFoundError as e:
             print(f"❌ Módulo não encontrado: {e.name}")
             return
@@ -134,8 +138,6 @@ class Feline:
             return
         print(f"🚀 Rodando {import_path} em http://{host}:{port} ...")
 
-        uvicorn.run(app, host=host, port=port, reload=debug)
-
     def get(self, path) -> Callable:
         def decorator(func) -> Callable:
             self.router.set_route("GET", path, func)
@@ -145,13 +147,14 @@ class Feline:
 
     def post(self, path) -> Callable:
         def decorator(func) -> Callable:
-            self.router.set_route("POST",path, func)
+            self.router.set_route("POST", path, func)
             return func
 
         return decorator
 
     def onerror(self, exception=Exception) -> Callable:
-        def decorator(func)-> Callable:
-            self.exception_handles.append((exception,func))
+        def decorator(func) -> Callable:
+            self.exception_handles.append((exception, func))
             return func
+
         return decorator
