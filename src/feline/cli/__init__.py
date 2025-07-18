@@ -16,7 +16,9 @@ import requests
 from importlib.metadata import version as importlib_version, PackageNotFoundError
 
 from rich.traceback import install
+
 install(show_locals=True)
+
 
 def get_local_version(package: str = "feline") -> str:
     try:
@@ -56,10 +58,10 @@ def run(import_path, reload, host, port):
     if ":" not in import_path:
         click.echo("❌ Formato inválido. Use o formato: módulo:app (ex: app:app)")
         return
-    
+
     module_name, app_name = import_path.split(":")
 
-    if '' not in sys.path and os.getcwd() not in sys.path:
+    if "" not in sys.path and os.getcwd() not in sys.path:
         sys.path.insert(0, os.getcwd())
 
     try:
@@ -77,7 +79,7 @@ def run(import_path, reload, host, port):
     except Exception as e:
         click.echo(f"❌ Erro inesperado: {e}")
         raise e
-    
+
     click.echo(f"🚀 Rodando {import_path} em http://{host}:{port} ...")
     uvicorn.run(import_path, host=host, port=port, reload=reload)
 
@@ -102,20 +104,18 @@ def init(name: str) -> None:
 
     # rota inicial separada
     with open(f"{base}/routes/index.py", "w") as f:
-        f.write(
-            "def get():\n"
-            "    return 'Hello from Feline!'\n"
-        )
+        f.write("def get():\n" "    return 'Hello from Feline!'\n")
 
     click.echo(f"🐣 Projeto '{name}' criado com sucesso!")
 
+
 @cli.command(help="🧼 Limpa __pycache__ (Nan bro meus olhos ardem quando eu dou tree)")
 @click.argument("path")
-def clean(path:str=".") -> None:
+def clean(path: str = ".") -> None:
     removed = 0
     for dirpath, dirnames, filenames in os.walk(path):
-        if '__pycache__' in dirnames:
-            pycache_path = os.path.join(dirpath, '__pycache__')
+        if "__pycache__" in dirnames:
+            pycache_path = os.path.join(dirpath, "__pycache__")
             try:
                 shutil.rmtree(pycache_path)
                 print(f"Removed: {pycache_path}")
@@ -123,6 +123,7 @@ def clean(path:str=".") -> None:
             except Exception as e:
                 print(f"Failed to remove {pycache_path}: {e}")
     print(f"\nTotal __pycache__ directories removed: {removed}")
+
 
 def get_ip_info():
     try:

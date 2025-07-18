@@ -6,16 +6,16 @@ from feline.extensions.security.cryptography import decrypt, encrypt
 class Cookies:
     def __init__(self, raw_cookies: str) -> None:
         self._raw_cookies: str = raw_cookies
-        self._cookies: dict[str,str] = {}
-        self._setcookies: dict[str,str] = {}
-        self._is_loaded:bool = False
+        self._cookies: dict[str, str] = {}
+        self._setcookies: dict[str, str] = {}
+        self._is_loaded: bool = False
 
     def _load(self) -> None:
         """Carrega cookies do cabeçalho raw_cookies.
         Essa função se trata de um lazy load para evitar processamento extra em rotas que não necesita de cookies
         """
         if self._is_loaded:
-            return # ignore load if loaded
+            return  # ignore load if loaded
 
         if self._raw_cookies:
             cookie_pairs: list[str] = self._raw_cookies.split(sep=";")
@@ -36,9 +36,9 @@ class Cookies:
         self,
         key: str,
         value: str,
-        expires: str|None = None,
-        max_age: int|None = None,
-        domain: str|None = None,
+        expires: str | None = None,
+        max_age: int | None = None,
+        domain: str | None = None,
         path: str = "/",
         secure: bool = True,
         httponly: bool = True,
@@ -61,7 +61,9 @@ class Cookies:
             "priority": priority,
         }
 
-        cookie_str: str = self.create_set_cookie_string(key=key, value=value_encrypted, options=options)
+        cookie_str: str = self.create_set_cookie_string(
+            key=key, value=value_encrypted, options=options
+        )
         self._setcookies[key] = cookie_str
 
     def create_set_cookie_string(self, key: str, value: str, options: dict) -> str:

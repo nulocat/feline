@@ -12,6 +12,7 @@ class MidwareBase:
 
     def __call__(self, func):
         if inspect.iscoroutinefunction(func):
+
             @wraps(func)
             async def async_wrapper(*args, **kwargs) -> Response:
                 self.request = context.request
@@ -35,6 +36,7 @@ class MidwareBase:
             return async_wrapper
 
         else:
+
             @wraps(func)
             def wrapper(*args, **kwargs) -> Response:
                 self.request = context.request

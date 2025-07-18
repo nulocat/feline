@@ -12,7 +12,7 @@ class Request:
     def __init__(self, scope: HTTPScope, receive: Receive) -> None:
         self.scope: HTTPScope = scope
         self._receive: Receive = receive
-        self.host, self.port = scope["client"] or ("Unknow",0)
+        self.host, self.port = scope["client"] or ("Unknow", 0)
         self.method: str = scope["method"]
         self.path: str = scope["path"]
         self._cached_body: bytes | None = None
@@ -57,26 +57,31 @@ class Request:
         if self._cached_json is None:
             import json
 
-            self._cached_json = json.loads(s=bytes(await self.body).decode(encoding="utf-8"))
+            self._cached_json = json.loads(
+                s=bytes(await self.body).decode(encoding="utf-8")
+            )
         return self._cached_json or {}
-    
+
     @property
     async def form(self) -> dict[str, str]:
         """Parse the request body as form data."""
         if self._cached_form is None:
-            self._cached_form = self._parse_query_params(query_string=bytes(await self.body))
-        
+            self._cached_form = self._parse_query_params(
+                query_string=bytes(await self.body)
+            )
+
         return self._cached_form
-    
+
     @property
     async def text(self) -> str:
         if self._cached_text is None:
             self._cached_text = str(bytes(await self.body).decode())
         return self._cached_text
-    
+
     @property
     def args(self) -> dict[str, str]:
         if self._cached_args is None:
-            self._cached_args = self._parse_query_params(query_string=self.scope["query_string"]) 
+            self._cached_args = self._parse_query_params(
+                query_string=self.scope["query_string"]
+            )
         return self._cached_args
-

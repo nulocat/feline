@@ -1,4 +1,3 @@
-
 from jinja2 import Environment, FileSystemLoader, Template
 
 from feline.http.response import Response
@@ -12,4 +11,4 @@ def render(template_name, **template_vars) -> Response:
 
     template: Template = env.get_template(name=template_name)
 
-    return Response().html(template.render(request=context.request,**template_vars))
+    return Response().html(template.render(request=context.request, **template_vars))

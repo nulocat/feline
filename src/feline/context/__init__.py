@@ -12,9 +12,11 @@ if TYPE_CHECKING:
 
     from feline.http.cookies import Cookies
 
+
 class GlobalObject(AttributeDict):
     def __init__(self):
         super().__init__()
+
 
 _ctx_cookies: ContextVar[Cookies] = ContextVar("cookies")
 _ctx_request: ContextVar[Request] = ContextVar("request")
@@ -28,7 +30,7 @@ class _Context:
     @property
     def cookies(self) -> Cookies:
         return cast("Cookies", _ctx_cookies.get())
-    
+
     @cookies.setter
     def cookies(self, value: Cookies) -> None:
         _ctx_cookies.set(value)
@@ -63,5 +65,3 @@ class _Context:
 
 
 context = _Context()
-
-

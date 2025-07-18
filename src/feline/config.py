@@ -14,5 +14,3 @@ class Config:
 
     def __setattr__(self, name: str, value: Any) -> None:
         self.__dict__[name] = value
-
-

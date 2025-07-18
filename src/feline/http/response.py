@@ -5,6 +5,7 @@ import json
 from feline.http.cookies import Cookies
 from feline.context import context
 
+
 class Response:
     def __init__(self, content=b"", status_code=200, headers: dict | None = None):
         # Inicializando o corpo, status e headers
@@ -28,11 +29,11 @@ class Response:
         )
 
         headers.extend(changed_cookies)
-        headers.append((b"content-length",str(len(bytes(self))).encode()))
+        headers.append((b"content-length", str(len(bytes(self))).encode()))
 
         return headers
 
-    def json(self, data:dict) -> Self:
+    def json(self, data: dict) -> Self:
         """Retorna a resposta no formato JSON."""
         import json
 
@@ -40,13 +41,13 @@ class Response:
         self.set_header(name="Content-Type", value="application/json")
         return self
 
-    def html(self, data:str) -> Self:
+    def html(self, data: str) -> Self:
         """Retorna a resposta no formato HTML."""
         self.content = data.encode("utf-8")
         self.set_header(name="Content-Type", value="text/html")
         return self
 
-    def text(self, data:str) -> Self:
+    def text(self, data: str) -> Self:
         """Retorna a resposta no formato de texto simples."""
         self.content = data.encode("utf-8")
         self.set_header(name="Content-Type", value="text/plain")
@@ -65,19 +66,28 @@ def redirect(to: str, permanent: bool = False) -> Response:
     res.content = f"Redirecting to {to}".encode("utf-8")
     return res
 
-def html(data: str, status: int = 200, headers: dict[str, str] | None = None) -> Response:
+
+def html(
+    data: str, status: int = 200, headers: dict[str, str] | None = None
+) -> Response:
     res = Response(status_code=status, headers=headers)
     res.set_header("Content-Type", "text/html")
     res.content = data.encode("utf-8")
     return res
 
-def json_response(data: Any, status: int = 200, headers: dict[str, str] | None = None) -> Response:
+
+def json_response(
+    data: Any, status: int = 200, headers: dict[str, str] | None = None
+) -> Response:
     res = Response(status_code=status, headers=headers)
     res.set_header("Content-Type", "application/json")
     res.content = json.dumps(data).encode("utf-8")
     return res
 
-def text(data: str, status: int = 200, headers: dict[str, str] | None = None) -> Response:
+
+def text(
+    data: str, status: int = 200, headers: dict[str, str] | None = None
+) -> Response:
     res = Response(status_code=status, headers=headers)
     res.set_header("Content-Type", "text/plain")
     res.content = data.encode("utf-8")
@@ -87,11 +97,14 @@ def text(data: str, status: int = 200, headers: dict[str, str] | None = None) ->
 def bad_request(message: str = "Bad Request") -> Response:
     return text(message, status=400)
 
+
 def not_found(message: str = "Not Found") -> Response:
     return text(message, status=404)
 
+
 def unauthorized(message: str = "Unauthorized") -> Response:
     return text(message, status=401)
+
 
 def server_error(message: str = "Internal Server Error") -> Response:
     return text(message, status=500)
