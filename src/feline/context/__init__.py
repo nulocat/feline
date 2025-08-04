@@ -7,10 +7,9 @@ from feline.config import Config
 from feline.structures import AttributeDict
 
 if TYPE_CHECKING:
+    from feline.http.cookies import Cookies
     from feline.http.request import Request
     from feline.http.response import Response
-
-    from feline.http.cookies import Cookies
 
 
 class GlobalObject(AttributeDict):

@@ -2,7 +2,6 @@ from typing import Any, Awaitable, Callable
 from urllib.parse import parse_qs
 
 from asgiref.typing import HTTPScope
-
 from feline.structures import AttributeDict
 
 Receive = Callable[[], Awaitable[dict[str, bytes | bool]]]

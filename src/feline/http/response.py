@@ -1,9 +1,8 @@
-from typing import Self
-from typing import Any
 import json
+from typing import Any, Self
 
-from feline.http.cookies import Cookies
 from feline.context import context
+from feline.http.cookies import Cookies
 
 
 class Response:

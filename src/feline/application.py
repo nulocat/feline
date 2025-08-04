@@ -1,7 +1,8 @@
 import importlib
+import inspect
 from typing import Callable
-import uvicorn
 
+import uvicorn
 from feline.config import Config
 from feline.context import _Context, context
 from feline.context.manager import request_context_window
@@ -10,8 +11,6 @@ from feline.http.request import Request
 from feline.http.response import Response, not_found
 from feline.routing.router import Router
 from rich.traceback import install as rich_trace_install
-import inspect
-
 
 rich_trace_install()
 
@@ -123,10 +122,13 @@ class Feline:
             mod = importlib.import_module(module_name)
             app = getattr(mod, app_name)
 
+            print(f"🚀 Rodando {import_path} em http://{host}:{port} ...")
+
             if not debug:
                 uvicorn.run(app, host=host, port=port, reload=debug)
             else:
                 uvicorn.run(import_path, host=host, port=port, reload=True)
+
         except ModuleNotFoundError as e:
             print(f"❌ Módulo não encontrado: {e.name}")
             return
@@ -136,7 +138,6 @@ class Feline:
         except Exception as e:
             print(f"❌ Erro inesperado: {e}")
             return
-        print(f"🚀 Rodando {import_path} em http://{host}:{port} ...")
 
     def get(self, path) -> Callable:
         def decorator(func) -> Callable:

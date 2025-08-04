@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
-from feline.http.request import Request
+
 from feline.context import context
 from feline.http.cookies import Cookies
+from feline.http.request import Request
 
 
 @asynccontextmanager

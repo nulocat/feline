@@ -1,7 +1,7 @@
-import os
-import hashlib
 import base64
+import hashlib
 import hmac
+import os
 
 
 class AlgorithmNotSupported(Exception):

@@ -1,7 +1,6 @@
-from jinja2 import Environment, FileSystemLoader, Template
-
-from feline.http.response import Response
 from feline.context import context
+from feline.http.response import Response
+from jinja2 import Environment, FileSystemLoader, Template
 
 
 def render(template_name, **template_vars) -> Response:

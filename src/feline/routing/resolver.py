@@ -1,131 +1,75 @@
-from inspect import Signature, signature, Parameter
-from typing import get_args, get_origin, Annotated
-from feline.routing.parameters import Body, Form, Query
-from feline.http.request import Request
+from inspect import Parameter, signature
+from typing import Annotated, get_args, get_origin
+
 from feline.context import context
 from feline.exceptions import InvalidParameterResolution
 
-
-def get_params(fn) -> dict[str, Parameter]:
-    sig: Signature = signature(fn)
-    return dict(sig.parameters)
+def get_params(fn):
+    return dict(signature(fn).parameters)
 
 
-def extract_annotation(param: Parameter):
-    """Retorna o tipo real e os metadados, caso Annotated seja usado."""
-    annotation = param.annotation
-    if get_origin(annotation) is Annotated:
-        args = get_args(annotation)
-        real_type = args[0]
-        metadata = args[1:]
-        return real_type, metadata
-    return annotation, []
+def get_annotation_type(param: Parameter):
+    ann = param.annotation
+    if get_origin(ann) is Annotated:
+        return get_args(ann)[0]
+    return ann if ann != Parameter.empty else str
 
 
-async def resolver_arguments(fn) -> dict:
+def cast_value(value, to_type):
+    if value is None:
+        return None
+    try:
+        if to_type == bool:
+            return str(value).lower() in ("1", "true", "yes", "on")
+        return to_type(value)
+    except:
+        return None
+
+
+async def resolver_arguments(fn):
     params = get_params(fn)
+    req = context.request
+    args = {}
 
-    request_obj = context.request
-    arguments = {}
-
-    form_data = None
-    json_data = None
-    form_error = False
-    json_error = False
+    form = None
+    json = None
 
     for name, param in params.items():
-        annotation_type, metadata = extract_annotation(param)
+        if name == "request" or name == "req" or name == "REQUEST":
+            args[name] = req
+            continue
 
-        # Combina os metadados de Annotated com o default
-        source_hint = None
-        for meta in metadata:
-            if isinstance(meta, (Query, Form, Body)):
-                source_hint = meta
-                break
-        if isinstance(param.default, (Query, Form, Body)):
-            source_hint = param.default
+        expected_type = get_annotation_type(param)
+        default = param.default if param.default != Parameter.empty else None
 
-        # if is request give to her
-        if name == "request" or annotation_type is Request:
-            arguments[name] = request_obj
+        value = req.args.get(name)
 
-        elif isinstance(source_hint, Body):
-            try:
-                if source_hint.type == "JSON":
-                    if json_data is None and not json_error:
-                        try:
-                            json_data = await request_obj.json
-                        except:
-                            json_error = True
-                    arguments[name] = (
-                        json_data.get(name, source_hint.default)
-                        if json_data
-                        else source_hint.default
-                    )
-
-                elif source_hint.type == "TEXT":
-                    arguments[name] = await request_obj.text
-
-            except:
-                raise InvalidParameterResolution(
-                    request_obj,
-                    name,
-                    f"body with {source_hint.type}",
-                    await request_obj.text,
-                )
-
-        elif isinstance(source_hint, Form):
-            if form_data is None and not form_error:
+        if value is None:
+            if json is None:
                 try:
-                    form_data = await request_obj.form
+                    json = await req.json
                 except:
-                    form_error = True
-            if not form_error and form_data is not None:
-                arguments[name] = form_data.get(name, source_hint.default)
+                    json = {}
+            value = json.get(name)
 
-        elif isinstance(source_hint, Query):
-            arguments[name] = request_obj.args.get(name, source_hint.default)
-
-        else:
-            value = request_obj.args.get(name)
-
-            if value is None and json_data is None and not json_error:
+        if value is None:
+            if form is None:
                 try:
-                    json_data = await request_obj.json
+                    form = await req.form
                 except:
-                    json_error = True
+                    form = {}
+            value = form.get(name)
 
-            if value is None and json_data:
-                value = json_data.get(name)
+        if value is None:
+            if default is not None:
+                args[name] = default
+                continue
+            raise InvalidParameterResolution(req, name, "query/form/json", "missing")
 
-            if value is None and form_data is None and not form_error:
-                try:
-                    form_data = await request_obj.form
-                except:
-                    form_error = True
+        casted = cast_value(value, expected_type)
+        if casted is None:
+            raise InvalidParameterResolution(req, name, expected_type.__name__, value)
 
-            if value is None and form_data:
-                value = form_data.get(name)
+        args[name] = casted
 
-            if value is None:
-                raise InvalidParameterResolution(
-                    request_obj, name, "query, form or json", "nothing"
-                )
-
-            arguments[name] = value
-
-        if arguments.get(name) is None:
-            expected_from = (
-                source_hint.__class__.__name__.lower()
-                if source_hint
-                else "query, form or json"
-            )
-
-            raise InvalidParameterResolution(
-                request_obj,
-                name,
-                f"required parameter from {expected_from}",
-                "None (no value provided and no default set)",
-            )
-
-    return arguments
+    return args

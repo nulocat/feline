@@ -1,9 +1,10 @@
 import asyncio
 import inspect
 from functools import wraps
-from feline.http.response import Response
-from feline.http.request import Request
+
 from feline.context import context
+from feline.http.request import Request
+from feline.http.response import Response
 
 
 class MidwareBase:

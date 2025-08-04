@@ -2,19 +2,19 @@
 
 import datetime
 import importlib
+import importlib.metadata as metadata
 import os
 import platform
 import shutil
 import socket
 import sys
-import rich_click as click
-from rich.console import Console
-import uvicorn
-import importlib.metadata as metadata
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as importlib_version
+
 import requests
-
-from importlib.metadata import version as importlib_version, PackageNotFoundError
-
+import rich_click as click
+import uvicorn
+from rich.console import Console
 from rich.traceback import install
 
 install(show_locals=True)
